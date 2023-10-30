@@ -57,25 +57,25 @@ int list_dump(const List* list, const char *file, int line, const char *function
 
     fprintf(LOG_FILE, "number: ");
     for (size_t i = 0; i < ListLen; i++)
-        fprintf(LOG_FILE, "%04lld ", i);
+        fprintf(LOG_FILE, " %04lld |", i);
     fprintf(LOG_FILE, "\n\n");
 
     fprintf(LOG_FILE, "data:   ");
     for (size_t i = 0; i < ListLen; i++)
-        fprintf(LOG_FILE, "%04d ", list->data[i]);
+        fprintf(LOG_FILE, " %04d |", list->data[i]);
     fprintf(LOG_FILE, "\n\n");
 
     fprintf(LOG_FILE, "next:   ");
     for (size_t i = 0; i < ListLen; i++)
-        fprintf(LOG_FILE, "%04d ", list->next[i]);
+        fprintf(LOG_FILE, " %04d |", list->next[i]);
     fprintf(LOG_FILE, "\n\n");
 
     fprintf(LOG_FILE, "prev:   ");
     for (size_t i = 0; i < ListLen; i++)
-        fprintf(LOG_FILE, "%04d ", list->prev[i]);
+        fprintf(LOG_FILE, " %04d |", list->prev[i]);
     fprintf(LOG_FILE, "\n\n");
 
-    fprintf(LOG_FILE, "----------------------------------------------------------------------------------");
+    fprintf(LOG_FILE, "---------------------------------------------------------------------------------------------------------------");
     fprintf(LOG_FILE, "\n\n");
 
     return NoErrors;
