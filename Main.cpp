@@ -23,7 +23,10 @@ int main() {
     list.tail = 8;
     list.free = 9;
 
-    //list_dump(&list);
+    list.next[0] = list.head;
+    list.prev[0] = list.tail;
+
+    list_dump(&list, __FILE__, __LINE__, __func__);
 
     list_push(&list, 25, 2);
     list_dump(&list, __FILE__, __LINE__, __func__);
@@ -31,13 +34,16 @@ int main() {
     list_push(&list, 90, 8);
     list_dump(&list, __FILE__, __LINE__, __func__);
 
-    /*list_pop(&list, 8);
-    list_dump(&list);*/
+    list_pop(&list, 8);
+    list_dump(&list, __FILE__, __LINE__, __func__);
 
     list_pop(&list, 0);
     list_dump(&list, __FILE__, __LINE__, __func__);
 
     list_pop(&list, 0);
+    list_dump(&list, __FILE__, __LINE__, __func__);
+
+    list_pop(&list, 4);
     list_dump(&list, __FILE__, __LINE__, __func__);
 
     list_push(&list, 7, 0);
@@ -50,7 +56,7 @@ int main() {
     list_dump(&list, __FILE__, __LINE__, __func__);
 
     /*list_pop(&list, 5);
-    list_dump(&list);*/
+    list_dump(&list, __FILE__, __LINE__, __func__);*/
 
     list_destructor(&list);
 

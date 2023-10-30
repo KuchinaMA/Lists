@@ -14,13 +14,13 @@ int list_constructor(List* list) {
     list->data[0] = ListPoison;
 
     list->next = (int*)calloc(ListLen, sizeof(int));
-    list->next[0] = 0;
-    for (size_t i = 1; i < ListLen; i++)
+    //list->next[0] = 0;
+    for (size_t i = 0; i < ListLen; i++)
         list->next[i] = -1 * (i + 1);
 
     list->prev = (int*)calloc(ListLen, sizeof(int));
-    list->prev[0] = 0;
-    for (size_t i = 1; i < ListLen; i++)
+    //list->prev[0] = 0;
+    for (size_t i = 0; i < ListLen; i++)
         list->prev[i] = - 1;
 
     list->head = 0;
@@ -83,6 +83,8 @@ int list_dump(const List* list, const char *file, int line, const char *function
 
 int list_push(List* list, int value, int previous) {
 
+    list_verify(list);
+
     if (list->prev[previous] == -1) {
         fprintf(LOG_FILE, "Can't find this element!\n\n");
         return IncorrectInput;
@@ -92,23 +94,17 @@ int list_push(List* list, int value, int previous) {
 
     int next_free = abs(list->next[list->free]);
 
-    if (previous == 0) {      //считаем что в этом случае пуш перед головой
-        list->next[list->free] = list->head;
+    if (previous == list->prev[list->head])
         list->head = list->free;
-    }
 
-    else {
-        list->next[list->free] = list->next[previous];
-        list->next[previous] = list->free;
-    }
+    list->next[list->free] = list->next[previous];
+    list->next[previous] = list->free;
 
     list->prev[list->free] = previous;
     list->prev[list->next[list->free]] = list->free;
 
-    if (previous == list->tail) {
+    if (previous == list->tail)
         list->tail = list->free;
-        list->prev[list->next[list->free]] = 0;    //тк это нулевой элемент
-    }
 
     list->free = next_free;
 
@@ -119,6 +115,8 @@ int list_push(List* list, int value, int previous) {
 
 int list_pop(List* list, int previous) {
 
+    list_verify(list);
+
     if (list->prev[previous] == -1) {
         fprintf(LOG_FILE, "This element has been already deleted!\n\n");
         return IncorrectInput;
@@ -128,11 +126,8 @@ int list_pop(List* list, int previous) {
     int deleted_elem = list->next[previous];
 
     if (previous == list->prev[list->head]) {
-        deleted_elem = list->head;
-        next_free = list->head;
         int head = list->next[list->head];
         list->head = head;
-        list->prev[list->head] = 0;
     }
 
     if (previous == list->prev[list->tail]) {
@@ -140,8 +135,7 @@ int list_pop(List* list, int previous) {
         list->tail = tail;
     }
 
-    if (list->prev[deleted_elem] != 0)                        //если удаляем не голову чтобы next для
-        list->next[previous] = list->next[deleted_elem];      //нулевого элемента не менялся ???
+    list->next[previous] = list->next[deleted_elem];
     list->next[deleted_elem] = -1 * list->free;
 
     list->prev[list->next[previous]] = list->prev[deleted_elem];
@@ -158,7 +152,6 @@ int list_pop(List* list, int previous) {
 int list_check(const List* list) {
 
     int ans = 0;
-    //int next_prev = next_prev_check(list);
 
     if (list == NULL)                                ans = ans | ListNull;
 
