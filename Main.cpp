@@ -1,10 +1,11 @@
 #include <stdio.h>
 
+#include "Logfile.h"
 #include "List.h"
 
 int main() {
 
-    FILE* logfile = fopen("ListDump.log", "w");
+    open_log("ListDump.log", __TIME__);
 
     List list = {};
 
@@ -22,36 +23,34 @@ int main() {
     list.tail = 8;
     list.free = 9;
 
-    //list_dump(&list, logfile);
+    //list_dump(&list);
 
-    list_push(&list, 25, 2, logfile);
-    list_dump(&list, logfile);
+    list_push(&list, 25, 2);
+    list_dump(&list, __FILE__, __LINE__, __func__);
 
-    list_push(&list, 90, 8, logfile);
-    list_dump(&list, logfile);
+    list_push(&list, 90, 8);
+    list_dump(&list, __FILE__, __LINE__, __func__);
 
     /*list_pop(&list, 8);
-    list_dump(&list, logfile);*/
+    list_dump(&list);*/
 
-    list_pop(&list, 0, logfile);
-    list_dump(&list, logfile);
+    list_pop(&list, 0);
+    list_dump(&list, __FILE__, __LINE__, __func__);
 
-    list_pop(&list, 0, logfile);
-    list_dump(&list, logfile);
+    list_pop(&list, 0);
+    list_dump(&list, __FILE__, __LINE__, __func__);
 
-    list_push(&list, 7, 0, logfile);
-    list_dump(&list, logfile);
+    list_push(&list, 7, 0);
+    list_dump(&list, __FILE__, __LINE__, __func__);
 
-    list_push(&list, 5, 0, logfile);
-    list_dump(&list, logfile);
+    list_push(&list, 5, 0);
+    list_dump(&list, __FILE__, __LINE__, __func__);
 
-    list_push(&list, 3, 0, logfile);
-    list_dump(&list, logfile);
+    list_push(&list, 3, 0);
+    list_dump(&list, __FILE__, __LINE__, __func__);
 
     /*list_pop(&list, 5);
-    list_dump(&list, logfile);*/
-
-    fclose(logfile);
+    list_dump(&list);*/
 
     list_destructor(&list);
 

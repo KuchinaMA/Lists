@@ -29,11 +29,11 @@ struct List {
 
 int list_constructor(List* list);
 int list_destructor(List* list);
-void list_verify(const List* list, FILE* logfile);
+void list_verify(const List* list);
 int list_check(const List* list);
 int next_prev_check(const List* list);
-int list_dump(const List* list, FILE* logfile);
-int list_push(List* list, int value, int previous, FILE* logfile);
-int list_pop(List* list, int previous, FILE* logfile);
+int list_dump(const List* list, const char *file, int line, const char *function);
+int list_push(List* list, int value, int previous);
+int list_pop(List* list, int previous);
 
 #endif // LIST_H_INCLUDED

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "Logfile.h"
 #include "List.h"
 
 int list_constructor(List* list) {
@@ -14,12 +15,12 @@ int list_constructor(List* list) {
 
     list->next = (int*)calloc(ListLen, sizeof(int));
     list->next[0] = 0;
-    for (int i = 1; i < ListLen; i++)
+    for (size_t i = 1; i < ListLen; i++)
         list->next[i] = -1 * (i + 1);
 
     list->prev = (int*)calloc(ListLen, sizeof(int));
     list->prev[0] = 0;
-    for (int i = 1; i < ListLen; i++)
+    for (size_t i = 1; i < ListLen; i++)
         list->prev[i] = - 1;
 
     list->head = 0;
@@ -44,40 +45,46 @@ int list_destructor(List* list) {
     return NoErrors;
 }
 
-int list_dump(const List* list, FILE* logfile) {
+int list_dump(const List* list, const char *file, int line, const char *function) {
 
-    fprintf(logfile, "head = %d\n", list->head);
-    fprintf(logfile, "tail = %d\n", list->tail);
-    fprintf(logfile, "free = %d\n\n", list->free);
+    fprintf(LOG_FILE, "list_dump from file: %s line %d function: %s\n\n",
+                                             file, line, function);
+
+    fprintf(LOG_FILE, "head = %d\n", list->head);
+    fprintf(LOG_FILE, "tail = %d\n", list->tail);
+    fprintf(LOG_FILE, "free = %d\n\n", list->free);
 
 
-    fprintf(logfile, "number: ");
-    for (int i = 0; i < ListLen; i++)
-        fprintf(logfile, "%04d ", i);
-    fprintf(logfile, "\n\n");
+    fprintf(LOG_FILE, "number: ");
+    for (size_t i = 0; i < ListLen; i++)
+        fprintf(LOG_FILE, "%04lld ", i);
+    fprintf(LOG_FILE, "\n\n");
 
-    fprintf(logfile, "data:   ");
-    for (int i = 0; i < ListLen; i++)
-        fprintf(logfile, "%04d ", list->data[i]);
-    fprintf(logfile, "\n\n");
+    fprintf(LOG_FILE, "data:   ");
+    for (size_t i = 0; i < ListLen; i++)
+        fprintf(LOG_FILE, "%04d ", list->data[i]);
+    fprintf(LOG_FILE, "\n\n");
 
-    fprintf(logfile, "next:   ");
-    for (int i = 0; i < ListLen; i++)
-        fprintf(logfile, "%04d ", list->next[i]);
-    fprintf(logfile, "\n\n");
+    fprintf(LOG_FILE, "next:   ");
+    for (size_t i = 0; i < ListLen; i++)
+        fprintf(LOG_FILE, "%04d ", list->next[i]);
+    fprintf(LOG_FILE, "\n\n");
 
-    fprintf(logfile, "prev:   ");
-    for (int i = 0; i < ListLen; i++)
-        fprintf(logfile, "%04d ", list->prev[i]);
-    fprintf(logfile, "\n\n");
+    fprintf(LOG_FILE, "prev:   ");
+    for (size_t i = 0; i < ListLen; i++)
+        fprintf(LOG_FILE, "%04d ", list->prev[i]);
+    fprintf(LOG_FILE, "\n\n");
+
+    fprintf(LOG_FILE, "----------------------------------------------------------------------------------");
+    fprintf(LOG_FILE, "\n\n");
 
     return NoErrors;
 }
 
-int list_push(List* list, int value, int previous, FILE* logfile) {
+int list_push(List* list, int value, int previous) {
 
     if (list->prev[previous] == -1) {
-        fprintf(logfile, "Can't find this element!\n\n");
+        fprintf(LOG_FILE, "Can't find this element!\n\n");
         return IncorrectInput;
     }
 
@@ -105,15 +112,15 @@ int list_push(List* list, int value, int previous, FILE* logfile) {
 
     list->free = next_free;
 
-    list_verify(list, logfile);
+    list_verify(list);
 
     return NoErrors;
 }
 
-int list_pop(List* list, int previous, FILE* logfile) {
+int list_pop(List* list, int previous) {
 
     if (list->prev[previous] == -1) {
-        fprintf(logfile, "This element has been already deleted!\n\n");
+        fprintf(LOG_FILE, "This element has been already deleted!\n\n");
         return IncorrectInput;
     }
 
@@ -142,7 +149,7 @@ int list_pop(List* list, int previous, FILE* logfile) {
 
     list->free = next_free;
 
-    list_verify(list, logfile);
+    list_verify(list);
 
     return NoErrors;
 }
@@ -223,18 +230,18 @@ int next_prev_check(const List* list) {
 }
 
 
-void list_verify(const List* list, FILE* logfile) {
+void list_verify(const List* list) {
 
     int err = list_check(list);
 
-    if (err & ListNull)         fprintf(logfile, "ERROR! Pointer to list is NULL\n\n");
-    if (err & DataNull)         fprintf(logfile, "ERROR! Pointer to list.data is NULL\n\n");
-    if (err & NextNull)         fprintf(logfile, "ERROR! Pointer to list.next is NULL\n\n");
-    if (err & PrevNull)         fprintf(logfile, "ERROR! Pointer to list.prev is NULL\n\n");
-    if (err & NegativeHead)     fprintf(logfile, "ERROR! head < 0\n\n");
-    if (err & NegativeTail)     fprintf(logfile, "ERROR! tail < 0\n\n");
-    if (err & NegativeFree)     fprintf(logfile, "ERROR! free < 0\n\n");
-    if (err & NotMatchNextPrev) fprintf(logfile, "ERROR! list.next or list.prev is incorrect\n\n");
+    if (err & ListNull)         fprintf(LOG_FILE, "ERROR! Pointer to list is NULL\n\n");
+    if (err & DataNull)         fprintf(LOG_FILE, "ERROR! Pointer to list.data is NULL\n\n");
+    if (err & NextNull)         fprintf(LOG_FILE, "ERROR! Pointer to list.next is NULL\n\n");
+    if (err & PrevNull)         fprintf(LOG_FILE, "ERROR! Pointer to list.prev is NULL\n\n");
+    if (err & NegativeHead)     fprintf(LOG_FILE, "ERROR! head < 0\n\n");
+    if (err & NegativeTail)     fprintf(LOG_FILE, "ERROR! tail < 0\n\n");
+    if (err & NegativeFree)     fprintf(LOG_FILE, "ERROR! free < 0\n\n");
+    if (err & NotMatchNextPrev) fprintf(LOG_FILE, "ERROR! list.next or list.prev is incorrect\n\n");
 
 }
 
