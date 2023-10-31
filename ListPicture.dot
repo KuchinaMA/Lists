@@ -24,8 +24,8 @@ digraph {
   el2: <p2> -> el1: <p1> [color = "#006400", style = "dashed"];
   el1: <p1> -> el0: <p0> [color = "#006400", style = "dashed"];
   el0: <p0> -> el4: <p4> [color = "#006400", style = "dashed"];
-  el6: <n6> -> el7: <n7> [color = "#000066"];
-  el7: <n7> -> el8: <n8> [color = "#000066"];
-  el8: <n8> -> el9: <n9> [color = "#000066"];
+  el6: <n6> -> el7: <n7> [color = "#000066", style = "dashed"];
+  el7: <n7> -> el8: <n8> [color = "#000066", style = "dashed"];
+  el8: <n8> -> el9: <n9> [color = "#000066", style = "dashed"];
 }{  general[color = "#800000", style = filled, fillcolor = "#FFD5D5", label = "General information |      Capasity: 10 | Head: 1 | Tail: 4 | Free: 6"];
 }}

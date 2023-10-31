@@ -305,7 +305,7 @@ int list_dump_picture(const List* list) {
     int fCur = list->free;
     while (fCur != ListLen - 1) {
         int NextfCur = abs(list->next[fCur]); //куда ведёт стрелка
-        fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [color = \"#000066\"];\n", fCur, fCur, NextfCur, NextfCur);
+        fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [color = \"#000066\", style = \"dashed\"];\n", fCur, fCur, NextfCur, NextfCur);
         fCur = NextfCur;
     }
 
