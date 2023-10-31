@@ -14,18 +14,19 @@ int list_constructor(List* list) {
     list->data[0] = ListPoison;
 
     list->next = (int*)calloc(ListLen, sizeof(int));
-    //list->next[0] = 0;
     for (size_t i = 0; i < ListLen; i++)
         list->next[i] = -1 * (i + 1);
 
     list->prev = (int*)calloc(ListLen, sizeof(int));
-    //list->prev[0] = 0;
     for (size_t i = 0; i < ListLen; i++)
         list->prev[i] = - 1;
 
     list->head = 0;
     list->tail = 0; //???
     list->free = 1; //???
+
+    list->next[0] = list->head;
+    list->prev[0] = list->tail;
 
     return NoErrors;
 }

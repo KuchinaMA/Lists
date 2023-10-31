@@ -11,22 +11,12 @@ int main() {
 
     list_constructor(&list);
 
-    for (int i = 1; i < 9; i++) {
-        list.data[i] = 10*i;
-        list.next[i] = i + 1;
-        list.prev[i] = i - 1;
-    }
-
-    list.next[8] = 0;
-
-    list.head = 1;
-    list.tail = 8;
-    list.free = 9;
-
-    list.next[0] = list.head;
-    list.prev[0] = list.tail;
-
     list_dump(&list, __FILE__, __LINE__, __func__);
+
+    for (int i = 0; i < 8; i++) {
+        list_push(&list, 10*(i + 1), i);
+        list_dump(&list, __FILE__, __LINE__, __func__);
+    }
 
     list_push(&list, 25, 2);
     list_dump(&list, __FILE__, __LINE__, __func__);
