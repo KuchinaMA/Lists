@@ -246,9 +246,10 @@ int list_dump_picture(const List* list) {
     fprintf(dotfile, "digraph {\n");
     fprintf(dotfile, "  rankdir = LR;\n");
     fprintf(dotfile, "  node [shape = Mrecord, color = \"#006400\", style = filled, fillcolor = \"#D5FFD5\"];\n");
+    fprintf(dotfile, "{");
 
 
-    fprintf(dotfile, "  el0[color = \"#333333\", style = filled, fillcolor = \"#E9E9E9\", label = \"0 | | <d0> value: %d | <n0> next: %d | <p0> prev: %d\"];\n",
+    fprintf(dotfile, "  el0[color = \"#333333\", style = filled, fillcolor = \"#E9E9E9\", label = \"0 | Reserved | <d0> value: %d | <n0> next: %d | <p0> prev: %d\"];\n",
                                     list->data[0], list->next[0], list->prev[0]);
 
     for (int i = 1; i < ListLen; i++) {
@@ -256,11 +257,11 @@ int list_dump_picture(const List* list) {
         if (list->prev[i] != -1) {
 
             if (i == list->head)
-                fprintf(dotfile, "  el%d[label = \"%d | HEAD | <d%d> value: %d | <n%d> next: %d | <p%d> prev: %d\"];\n",
+                fprintf(dotfile, "  el%d[label = \"%d | Head | <d%d> value: %d | <n%d> next: %d | <p%d> prev: %d\"];\n",
                                   i, i, i, list->data[i], i, list->next[i], i, list->prev[i]);
 
             else if (i == list->tail)
-                fprintf(dotfile, "  el%d[label = \"%d | TAIL | <d%d> value: %d | <n%d> next: %d | <p%d> prev: %d\"];\n",
+                fprintf(dotfile, "  el%d[label = \"%d | Tail | <d%d> value: %d | <n%d> next: %d | <p%d> prev: %d\"];\n",
                                   i, i, i, list->data[i], i, list->next[i], i, list->prev[i]);
             else
                 fprintf(dotfile, "  el%d[label = \"%d | | <d%d> value: %d | <n%d> next: %d | <p%d> prev: %d\"];\n",
@@ -279,7 +280,7 @@ int list_dump_picture(const List* list) {
     fprintf(dotfile, "  ");
     for (int i = 0; i < ListLen - 1; i++)
         fprintf(dotfile, "el%d: <d%d> ->", i, i);
-    fprintf(dotfile, "el%d: <d%d> [weight = 100000, style = \"bold\", arrowhead = \"none\", color = \"#FFFFFF\"];\n", ListLen - 1, ListLen - 1);
+    fprintf(dotfile, "el%lld: <d%lld> [weight = 100000, style = \"bold\", arrowhead = \"none\", color = \"#FFFFFF\"];\n", ListLen - 1, ListLen - 1);
 
     int nCur = list->head;
     while (nCur != 0) {
@@ -307,6 +308,19 @@ int list_dump_picture(const List* list) {
         fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [color = \"#000066\"];\n", fCur, fCur, NextfCur, NextfCur);
         fCur = NextfCur;
     }
+
+    fprintf(dotfile, "}");
+
+
+    fprintf(dotfile, "{");
+
+    fprintf(dotfile, "  general[color = \"#333333\", style = filled, fillcolor = \"#E9E9E9\", label = \"General information |  \
+    Capasity: %lld | Head: %d | Tail: %d | Free: %d\"];\n", ListLen, list->head, list->tail, list->free);
+
+    fprintf(dotfile, "}");
+
+
+
 
 
     fprintf(dotfile, "}");
