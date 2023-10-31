@@ -239,3 +239,85 @@ void list_verify(const List* list) {
 
 }
 
+int list_dump_picture(const List* list) {
+
+    FILE* dotfile = fopen("ListPicture.dot", "w");
+
+    fprintf(dotfile, "digraph {\n");
+    fprintf(dotfile, "  rankdir = LR;\n");
+    fprintf(dotfile, "  node [shape = Mrecord, color = \"#006400\", style = filled, fillcolor = \"#D5FFD5\"];\n");
+
+
+    fprintf(dotfile, "  el0[color = \"#333333\", style = filled, fillcolor = \"#E9E9E9\", label = \"0 | | <d0> value: %d | <n0> next: %d | <p0> prev: %d\"];\n",
+                                    list->data[0], list->next[0], list->prev[0]);
+
+    for (int i = 1; i < ListLen; i++) {
+
+        if (list->prev[i] != -1) {
+
+            if (i == list->head)
+                fprintf(dotfile, "  el%d[label = \"%d | HEAD | <d%d> value: %d | <n%d> next: %d | <p%d> prev: %d\"];\n",
+                                  i, i, i, list->data[i], i, list->next[i], i, list->prev[i]);
+
+            else if (i == list->tail)
+                fprintf(dotfile, "  el%d[label = \"%d | TAIL | <d%d> value: %d | <n%d> next: %d | <p%d> prev: %d\"];\n",
+                                  i, i, i, list->data[i], i, list->next[i], i, list->prev[i]);
+            else
+                fprintf(dotfile, "  el%d[label = \"%d | | <d%d> value: %d | <n%d> next: %d | <p%d> prev: %d\"];\n",
+                                  i, i, i, list->data[i], i, list->next[i], i, list->prev[i]);
+        }
+
+        else
+            fprintf(dotfile, "  el%d[color = \"#000066\", style = filled, fillcolor = \"#D5EAFF\", label = \"%d | | <d%d> value: %d | <n%d> next: %d | <p%d> prev: %d\"];\n",
+                                  i, i, i, list->data[i], i, list->next[i], i, list->prev[i]);
+
+    }
+
+    //for (int i = 0; i < ListLen - 1; i++)
+        //fprintf(dotfile, "  el%d: <d%d> -> el%d: <d%d> [weight = 10000, style = \"bold\", arrowhead = \"none\", color = \"#FFFFFF\"];\n", i, i, i+1, i+1);
+
+    fprintf(dotfile, "  ");
+    for (int i = 0; i < ListLen - 1; i++)
+        fprintf(dotfile, "el%d: <d%d> ->", i, i);
+    fprintf(dotfile, "el%d: <d%d> [weight = 100000, style = \"bold\", arrowhead = \"none\", color = \"#FFFFFF\"];\n", ListLen - 1, ListLen - 1);
+
+    int nCur = list->head;
+    while (nCur != 0) {
+        int NextnCur = list->next[nCur]; //куда ведёт стрелка
+        fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [color = \"#006400\"];\n", nCur, nCur, NextnCur, NextnCur);
+        nCur = NextnCur;
+    }
+    int NextnCur = list->next[nCur];     //рисуем стрелку из фиктивного элемента
+    fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [color = \"#006400\"];\n", nCur, nCur, NextnCur, NextnCur);
+
+
+    int pCur = list->tail;
+    while (pCur != 0) {
+        int NextpCur = list->prev[pCur]; //куда ведёт стрелка
+        fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [color = \"#006400\", style = \"dashed\"];\n", pCur, pCur, NextpCur, NextpCur);
+        pCur = NextpCur;
+    }
+    int NextpCur = list->prev[pCur];     //рисуем стрелку из фиктивного элемента
+    fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [color = \"#006400\", style = \"dashed\"];\n", pCur, pCur, NextpCur, NextpCur);
+
+
+    int fCur = list->free;
+    while (fCur != ListLen - 1) {
+        int NextfCur = abs(list->next[fCur]); //куда ведёт стрелка
+        fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [color = \"#000066\"];\n", fCur, fCur, NextfCur, NextfCur);
+        fCur = NextfCur;
+    }
+
+
+    fprintf(dotfile, "}");
+
+    fclose(dotfile);
+
+    return NoErrors;
+}
+
+
+
+
+
+

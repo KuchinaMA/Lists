@@ -13,7 +13,12 @@ int main() {
 
     list_dump(&list, __FILE__, __LINE__, __func__);
 
-    for (int i = 0; i < 8; i++) {
+    /*for (int i = 0; i < 8; i++) {
+        list_push(&list, 10*(i + 1), i);
+        list_dump(&list, __FILE__, __LINE__, __func__);
+    }*/
+
+    for (int i = 0; i < 4; i++) {
         list_push(&list, 10*(i + 1), i);
         list_dump(&list, __FILE__, __LINE__, __func__);
     }
@@ -21,7 +26,9 @@ int main() {
     list_push(&list, 25, 2);
     list_dump(&list, __FILE__, __LINE__, __func__);
 
-    list_push(&list, 90, 8);
+    list_dump_picture(&list);
+
+    /*list_push(&list, 90, 8);
     list_dump(&list, __FILE__, __LINE__, __func__);
 
     list_pop(&list, 8);
@@ -43,7 +50,7 @@ int main() {
     list_dump(&list, __FILE__, __LINE__, __func__);
 
     list_push(&list, 3, 0);
-    list_dump(&list, __FILE__, __LINE__, __func__);
+    list_dump(&list, __FILE__, __LINE__, __func__);*/
 
     /*list_pop(&list, 5);
     list_dump(&list, __FILE__, __LINE__, __func__);*/
