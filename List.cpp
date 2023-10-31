@@ -295,11 +295,11 @@ int list_dump_picture(const List* list) {
     int pCur = list->tail;
     while (pCur != 0) {
         int NextpCur = list->prev[pCur]; //куда ведёт стрелка
-        fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [color = \"#006400\", style = \"dashed\"];\n", pCur, pCur, NextpCur, NextpCur);
+        fprintf(dotfile, "  el%d: <p%d> -> el%d: <p%d> [color = \"#006400\", style = \"dashed\"];\n", pCur, pCur, NextpCur, NextpCur);
         pCur = NextpCur;
     }
     int NextpCur = list->prev[pCur];     //рисуем стрелку из фиктивного элемента
-    fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [color = \"#006400\", style = \"dashed\"];\n", pCur, pCur, NextpCur, NextpCur);
+    fprintf(dotfile, "  el%d: <p%d> -> el%d: <p%d> [color = \"#006400\", style = \"dashed\"];\n", pCur, pCur, NextpCur, NextpCur);
 
 
     int fCur = list->free;
@@ -314,7 +314,7 @@ int list_dump_picture(const List* list) {
 
     fprintf(dotfile, "{");
 
-    fprintf(dotfile, "  general[color = \"#333333\", style = filled, fillcolor = \"#E9E9E9\", label = \"General information |  \
+    fprintf(dotfile, "  general[color = \"#800000\", style = filled, fillcolor = \"#FFD5D5\", label = \"General information |  \
     Capasity: %lld | Head: %d | Tail: %d | Free: %d\"];\n", ListLen, list->head, list->tail, list->free);
 
     fprintf(dotfile, "}");
