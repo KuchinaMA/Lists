@@ -21,12 +21,10 @@ int list_constructor(List* list) {
     for (size_t i = 0; i < ListLen; i++)
         list->prev[i] = - 1;
 
-    list->head = 0;
-    list->tail = 0; //???
-    list->free = 1; //???
+    list->free = 1;
 
-    list->next[0] = list->head;
-    list->prev[0] = list->tail;
+    list->next[0] = 0;
+    list->prev[0] = 0;
 
     return NoErrors;
 }
@@ -39,8 +37,6 @@ int list_destructor(List* list) {
     free(list->next);
     free(list->prev);
 
-    list->head = ListPoison;
-    list->tail = ListPoison;
     list->free = ListPoison;
 
     return NoErrors;
@@ -51,8 +47,8 @@ int list_dump(const List* list, const char *file, int line, const char *function
     fprintf(LOG_FILE, "list_dump from file: %s line %d function: %s\n\n",
                                              file, line, function);
 
-    fprintf(LOG_FILE, "head = %d\n", list->head);
-    fprintf(LOG_FILE, "tail = %d\n", list->tail);
+    fprintf(LOG_FILE, "head = %d\n", get_head(list));
+    fprintf(LOG_FILE, "tail = %d\n", get_tail(list));
     fprintf(LOG_FILE, "free = %d\n\n", list->free);
 
 
@@ -95,17 +91,11 @@ int list_push(List* list, int value, int previous) {
 
     int next_free = abs(list->next[list->free]);
 
-    if (previous == list->prev[list->head])
-        list->head = list->free;
-
     list->next[list->free] = list->next[previous];
     list->next[previous] = list->free;
 
     list->prev[list->free] = previous;
     list->prev[list->next[list->free]] = list->free;
-
-    if (previous == list->tail)
-        list->tail = list->free;
 
     list->free = next_free;
 
@@ -126,15 +116,6 @@ int list_pop(List* list, int previous) {
     int next_free = list->next[previous];
     int deleted_elem = list->next[previous];
 
-    if (previous == list->prev[list->head]) {
-        int head = list->next[list->head];
-        list->head = head;
-    }
-
-    if (previous == list->prev[list->tail]) {
-        int tail = list->prev[list->tail];
-        list->tail = tail;
-    }
 
     list->next[previous] = list->next[deleted_elem];
     list->next[deleted_elem] = -1 * list->free;
@@ -162,10 +143,6 @@ int list_check(const List* list) {
 
     if (list->prev == NULL)                          ans = ans | PrevNull;
 
-    if (list->head < 0)                              ans = ans | NegativeHead;
-
-    if (list->tail < 0)                              ans = ans | NegativeTail;
-
     if (list->free < 0)                              ans = ans | NegativeFree;
 
     ans = ans | next_prev_check(list);
@@ -180,7 +157,7 @@ int next_prev_check(const List* list) {
     int PrevData[ListLen] = {};
 
     int NextCount = 0;
-    int NextCur = list->head;
+    int NextCur = get_head(list);
 
     while (NextCur != 0) {
 
@@ -189,13 +166,8 @@ int next_prev_check(const List* list) {
         NextCount ++;
     }
 
-    /*printf("NEXT\n");
-    for (int a = 0; a < NextCount; a ++)
-        printf("%04d ", NextData[a]);
-    printf("\n\n");*/
-
     int PrevCount = 0;
-    int PrevCur = list->tail;
+    int PrevCur = get_tail(list);
 
 
     while (PrevCur != 0) {
@@ -205,10 +177,6 @@ int next_prev_check(const List* list) {
         PrevCount ++;
     }
 
-    /*printf("PREV\n");
-    for (int b = 0; b < PrevCount; b ++)
-        printf("%04d ", PrevData[b]);
-    printf("\n\n");*/
 
     if (NextCount != PrevCount)
         return NotMatchNextPrev;
@@ -232,8 +200,6 @@ void list_verify(const List* list) {
     if (err & DataNull)         fprintf(LOG_FILE, "ERROR! Pointer to list.data is NULL\n\n");
     if (err & NextNull)         fprintf(LOG_FILE, "ERROR! Pointer to list.next is NULL\n\n");
     if (err & PrevNull)         fprintf(LOG_FILE, "ERROR! Pointer to list.prev is NULL\n\n");
-    if (err & NegativeHead)     fprintf(LOG_FILE, "ERROR! head < 0\n\n");
-    if (err & NegativeTail)     fprintf(LOG_FILE, "ERROR! tail < 0\n\n");
     if (err & NegativeFree)     fprintf(LOG_FILE, "ERROR! free < 0\n\n");
     if (err & NotMatchNextPrev) fprintf(LOG_FILE, "ERROR! list.next or list.prev is incorrect\n\n");
 
@@ -252,6 +218,11 @@ int list_dump_picture(const List* list) {
     //fprintf(dotfile, "  splines = curved\n");
     //fprintf(dotfile, "  splines = polyline\n");
     //fprintf(dotfile, "  nodesep = 1\n");
+
+    int head = get_head(list);
+    int tail = get_tail(list);
+
+
     fprintf(dotfile, "  node [shape = Mrecord, color = \"#006400\", style = filled, fillcolor = \"#D5FFD5\"];\n");
     fprintf(dotfile, "{");
 
@@ -263,11 +234,11 @@ int list_dump_picture(const List* list) {
 
         if (list->prev[i] != -1) {
 
-            if (i == list->head)
+            if (i == head)
                 fprintf(dotfile, "  el%d[label = \"%d | Head | <d%d> value: %d | <n%d> next: %d | <p%d> prev: %d\"];\n",
                                   i, i, i, list->data[i], i, list->next[i], i, list->prev[i]);
 
-            else if (i == list->tail)
+            else if (i == tail)
                 fprintf(dotfile, "  el%d[label = \"%d | Tail | <d%d> value: %d | <n%d> next: %d | <p%d> prev: %d\"];\n",
                                   i, i, i, list->data[i], i, list->next[i], i, list->prev[i]);
             else
@@ -281,15 +252,13 @@ int list_dump_picture(const List* list) {
 
     }
 
-    //for (int i = 0; i < ListLen - 1; i++)
-        //fprintf(dotfile, "  el%d: <d%d> -> el%d: <d%d> [weight = 10000, style = \"bold\", arrowhead = \"none\", color = \"#FFFFFF\"];\n", i, i, i+1, i+1);
 
     fprintf(dotfile, "  ");
     for (int i = 0; i < ListLen - 1; i++)
         fprintf(dotfile, "el%d: <d%d> ->", i, i);
-    fprintf(dotfile, "el%lld: <d%lld> [weight = 100000, style = \"bold\", arrowhead = \"none\", color = \"#FFFFFF\"];\n", ListLen - 1, ListLen - 1);
+    fprintf(dotfile, "el%lld: <d%lld> [weight = 1000, style = \"bold\", arrowhead = \"none\", color = \"#FFFFFF\"];\n", ListLen - 1, ListLen - 1);
 
-    int nCur = list->head;
+    int nCur = head;
     while (nCur != 0) {
         int NextnCur = list->next[nCur]; //куда ведёт стрелка
         fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [color = \"#006400\"];\n", nCur, nCur, NextnCur, NextnCur);
@@ -299,7 +268,7 @@ int list_dump_picture(const List* list) {
     fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [weight = 1, color = \"#006400\"];\n", nCur, nCur, NextnCur, NextnCur);
 
 
-    int pCur = list->tail;
+    int pCur = tail;
     while (pCur != 0) {
         int NextpCur = list->prev[pCur]; //куда ведёт стрелка
         fprintf(dotfile, "  el%d: <p%d> -> el%d: <p%d> [weight = 1, color = \"#006400\", style = \"dashed\"];\n", pCur, pCur, NextpCur, NextpCur);
@@ -322,7 +291,7 @@ int list_dump_picture(const List* list) {
     fprintf(dotfile, "{");
 
     fprintf(dotfile, "  general[color = \"#800000\", style = filled, fillcolor = \"#FFD5D5\", label = \"General information |  \
-    Capasity: %lld | Head: %d | Tail: %d | Free: %d\"];\n", ListLen - 1, list->head, list->tail, list->free);
+    Capasity: %lld | Head: %d | Tail: %d | Free: %d\"];\n", ListLen - 1, head, tail, list->free);
 
     fprintf(dotfile, "}");
 
@@ -336,6 +305,22 @@ int list_dump_picture(const List* list) {
 
     return NoErrors;
 }
+
+
+
+int get_head(const List* list) {
+
+    int ans = list->next[0];
+    return ans;
+}
+
+int get_tail(const List* list) {
+
+    int ans = list->prev[0];
+    return ans;
+}
+
+
 
 
 
