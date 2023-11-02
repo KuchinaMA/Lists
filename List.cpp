@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 #include "Logfile.h"
 #include "List.h"
+
+char PictureNum[] = "1";
 
 int list_constructor(List* list) {
 
@@ -25,6 +28,8 @@ int list_constructor(List* list) {
 
     list->next[0] = 0;
     list->prev[0] = 0;
+
+    ctor_dump(list);
 
     return NoErrors;
 }
@@ -101,6 +106,8 @@ int list_push(List* list, int value, int previous) {
 
     list_verify(list);
 
+    push_dump(list, value, previous);
+
     return NoErrors;
 }
 
@@ -126,6 +133,8 @@ int list_pop(List* list, int previous) {
     list->free = next_free;
 
     list_verify(list);
+
+    pop_dump(list, previous);
 
     return NoErrors;
 }
@@ -261,27 +270,27 @@ int list_dump_picture(const List* list) {
     int nCur = head;
     while (nCur != 0) {
         int NextnCur = list->next[nCur]; //куда ведЄт стрелка
-        fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [color = \"#006400\"];\n", nCur, nCur, NextnCur, NextnCur);
+        fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [constraint = false, weight = 1, color = \"#006400\"];\n", nCur, nCur, NextnCur, NextnCur);
         nCur = NextnCur;
     }
     int NextnCur = list->next[nCur];     //рисуем стрелку из фиктивного элемента
-    fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [weight = 1, color = \"#006400\"];\n", nCur, nCur, NextnCur, NextnCur);
+    fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [constraint = false, weight = 1, color = \"#006400\"];\n", nCur, nCur, NextnCur, NextnCur);
 
 
     int pCur = tail;
     while (pCur != 0) {
         int NextpCur = list->prev[pCur]; //куда ведЄт стрелка
-        fprintf(dotfile, "  el%d: <p%d> -> el%d: <p%d> [weight = 1, color = \"#006400\", style = \"dashed\"];\n", pCur, pCur, NextpCur, NextpCur);
+        fprintf(dotfile, "  el%d: <p%d> -> el%d: <p%d> [constraint = false, weight = 1, color = \"#006400\", style = \"dashed\"];\n", pCur, pCur, NextpCur, NextpCur);
         pCur = NextpCur;
     }
     int NextpCur = list->prev[pCur];     //рисуем стрелку из фиктивного элемента
-    fprintf(dotfile, "  el%d: <p%d> -> el%d: <p%d> [weight = 1, color = \"#006400\", style = \"dashed\"];\n", pCur, pCur, NextpCur, NextpCur);
+    fprintf(dotfile, "  el%d: <p%d> -> el%d: <p%d> [constraint = false, weight = 1, color = \"#006400\", style = \"dashed\"];\n", pCur, pCur, NextpCur, NextpCur);
 
 
     int fCur = list->free;
     while (fCur != ListLen - 1) {
         int NextfCur = abs(list->next[fCur]); //куда ведЄт стрелка
-        fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [weight = 1, color = \"#000066\", style = \"dashed\"];\n", fCur, fCur, NextfCur, NextfCur);
+        fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [constraint = false, weight = 1, color = \"#000066\", style = \"dashed\"];\n", fCur, fCur, NextfCur, NextfCur);
         fCur = NextfCur;
     }
 
@@ -303,6 +312,8 @@ int list_dump_picture(const List* list) {
 
     fclose(dotfile);
 
+    create_picture();
+
     return NoErrors;
 }
 
@@ -319,6 +330,65 @@ int get_tail(const List* list) {
     int ans = list->prev[0];
     return ans;
 }
+
+void push_dump(const List* list, int value, int previous) {
+
+    fprintf(LOG_FILE, "Push %d after element with index %d\n\n", value, previous);
+    fprintf(LOG_FILE, "---------------------------------------------------------------------------------------------------------------");
+    fprintf(LOG_FILE, "\n\n");
+
+    list_dump_picture(list);
+
+    list_dump(list, __FILE__, __LINE__, __func__);
+
+}
+
+void pop_dump(const List* list, int previous) {
+
+    fprintf(LOG_FILE, "Pop after element with index %d\n\n", previous);
+    fprintf(LOG_FILE, "---------------------------------------------------------------------------------------------------------------");
+    fprintf(LOG_FILE, "\n\n");
+
+    list_dump_picture(list);
+    //fprintf(LOG_FILE, "<img src=\"/Pictures/ListPictureimg/название файла с расширением\Ф>\n");
+
+    list_dump(list, __FILE__, __LINE__, __func__);
+
+}
+
+void ctor_dump(const List* list) {
+
+    fprintf(LOG_FILE, "List after initializing\n\n");
+    fprintf(LOG_FILE, "---------------------------------------------------------------------------------------------------------------");
+    fprintf(LOG_FILE, "\n\n");
+
+    list_dump_picture(list);
+
+    list_dump(list, __FILE__, __LINE__, __func__);
+
+}
+
+
+void create_picture() {
+
+    char command0[1000] = "dot ListPicture.dot -T png -o";
+    char command1[1000] = "C:\\Users\\admin\\Documents\\GitHub\\Lists\\Pictures\\ListPicture";
+    char command2[] = ".png";
+
+    strcat(command1, PictureNum);
+    strcat(command1, command2);
+
+    strcat(command0, command1);
+    system(command0);
+
+    fprintf(LOG_FILE, "<img src = \"%s\">\n", command1);
+
+    snprintf(PictureNum, 2, "%d", (1 + atoi(PictureNum)));
+
+}
+
+
+
 
 
 

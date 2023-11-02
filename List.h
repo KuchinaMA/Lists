@@ -39,5 +39,11 @@ int list_pop(List* list, int previous);
 int get_head(const List* list);
 int get_tail(const List* list);
 
+void push_dump(const List* list, int value, int previous);
+void pop_dump(const List* list, int previous);
+void ctor_dump(const List* list);
+
+void create_picture();
+
 
 #endif // LIST_H_INCLUDED
