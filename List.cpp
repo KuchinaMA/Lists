@@ -245,6 +245,13 @@ int list_dump_picture(const List* list) {
 
     fprintf(dotfile, "digraph {\n");
     fprintf(dotfile, "  rankdir = LR;\n");
+    //fprintf(dotfile, "  overlap=false\n");
+    //fprintf(dotfile, "  splines = true\n");
+    //fprintf(dotfile, "  graph [splines = ortho];\n");
+    //fprintf(dotfile, "  splines = false\n");
+    //fprintf(dotfile, "  splines = curved\n");
+    //fprintf(dotfile, "  splines = polyline\n");
+    //fprintf(dotfile, "  nodesep = 1\n");
     fprintf(dotfile, "  node [shape = Mrecord, color = \"#006400\", style = filled, fillcolor = \"#D5FFD5\"];\n");
     fprintf(dotfile, "{");
 
@@ -289,23 +296,23 @@ int list_dump_picture(const List* list) {
         nCur = NextnCur;
     }
     int NextnCur = list->next[nCur];     //рисуем стрелку из фиктивного элемента
-    fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [color = \"#006400\"];\n", nCur, nCur, NextnCur, NextnCur);
+    fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [weight = 1, color = \"#006400\"];\n", nCur, nCur, NextnCur, NextnCur);
 
 
     int pCur = list->tail;
     while (pCur != 0) {
         int NextpCur = list->prev[pCur]; //куда ведёт стрелка
-        fprintf(dotfile, "  el%d: <p%d> -> el%d: <p%d> [color = \"#006400\", style = \"dashed\"];\n", pCur, pCur, NextpCur, NextpCur);
+        fprintf(dotfile, "  el%d: <p%d> -> el%d: <p%d> [weight = 1, color = \"#006400\", style = \"dashed\"];\n", pCur, pCur, NextpCur, NextpCur);
         pCur = NextpCur;
     }
     int NextpCur = list->prev[pCur];     //рисуем стрелку из фиктивного элемента
-    fprintf(dotfile, "  el%d: <p%d> -> el%d: <p%d> [color = \"#006400\", style = \"dashed\"];\n", pCur, pCur, NextpCur, NextpCur);
+    fprintf(dotfile, "  el%d: <p%d> -> el%d: <p%d> [weight = 1, color = \"#006400\", style = \"dashed\"];\n", pCur, pCur, NextpCur, NextpCur);
 
 
     int fCur = list->free;
     while (fCur != ListLen - 1) {
         int NextfCur = abs(list->next[fCur]); //куда ведёт стрелка
-        fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [color = \"#000066\", style = \"dashed\"];\n", fCur, fCur, NextfCur, NextfCur);
+        fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [weight = 1, color = \"#000066\", style = \"dashed\"];\n", fCur, fCur, NextfCur, NextfCur);
         fCur = NextfCur;
     }
 
@@ -315,7 +322,7 @@ int list_dump_picture(const List* list) {
     fprintf(dotfile, "{");
 
     fprintf(dotfile, "  general[color = \"#800000\", style = filled, fillcolor = \"#FFD5D5\", label = \"General information |  \
-    Capasity: %lld | Head: %d | Tail: %d | Free: %d\"];\n", ListLen, list->head, list->tail, list->free);
+    Capasity: %lld | Head: %d | Tail: %d | Free: %d\"];\n", ListLen - 1, list->head, list->tail, list->free);
 
     fprintf(dotfile, "}");
 

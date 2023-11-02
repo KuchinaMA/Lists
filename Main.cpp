@@ -13,17 +13,15 @@ int main() {
 
     list_dump(&list, __FILE__, __LINE__, __func__);
 
-    /*for (int i = 0; i < 8; i++) {
-        list_push(&list, 10*(i + 1), i);
-        list_dump(&list, __FILE__, __LINE__, __func__);
-    }*/
-
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 6; i++) {
         list_push(&list, 10*(i + 1), i);
         list_dump(&list, __FILE__, __LINE__, __func__);
     }
 
     list_push(&list, 25, 2);
+    list_dump(&list, __FILE__, __LINE__, __func__);
+
+    list_pop(&list, 4);
     list_dump(&list, __FILE__, __LINE__, __func__);
 
     list_dump_picture(&list);
