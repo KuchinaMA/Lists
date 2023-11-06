@@ -7,24 +7,26 @@
 #include "Logfile.h"
 #include "List.h"
 
-char PictureNum[] = "1";
+char PICTURENUM[] = "1";
 
 int list_constructor(List* list) {
 
     assert (list != NULL);
 
-    list->data = (int*)calloc(ListLen, sizeof(int));
-    list->data[0] = ListPoison;
+    list->data = (int*)calloc(INITIALLISTLEN, sizeof(int));
+    list->data[0] = LISTPOISON;
 
-    list->next = (int*)calloc(ListLen, sizeof(int));
-    for (size_t i = 0; i < ListLen; i++)
+    list->next = (int*)calloc(INITIALLISTLEN, sizeof(int));
+    for (size_t i = 0; i < INITIALLISTLEN; i++)
         list->next[i] = -1 * (i + 1);
 
-    list->prev = (int*)calloc(ListLen, sizeof(int));
-    for (size_t i = 0; i < ListLen; i++)
+    list->prev = (int*)calloc(INITIALLISTLEN, sizeof(int));
+    for (size_t i = 0; i < INITIALLISTLEN; i++)
         list->prev[i] = - 1;
 
     list->free = 1;
+    list->capacity = INITIALLISTLEN;
+    list->size = 0;
 
     list->next[0] = 0;
     list->prev[0] = 0;
@@ -38,11 +40,17 @@ int list_destructor(List* list) {
 
     assert (list != NULL);
 
+    for (int i = 0; i < list->capacity; i++){
+        list->data[i] = LISTPOISON;
+        list->next[i] = LISTPOISON;
+        list->prev[i] = LISTPOISON;
+    }
+
     free(list->data);
     free(list->next);
     free(list->prev);
 
-    list->free = ListPoison;
+    list->free = LISTPOISON;
 
     return NoErrors;
 }
@@ -58,22 +66,22 @@ int list_dump(const List* list, const char *file, int line, const char *function
 
 
     fprintf(LOG_FILE, "number: ");
-    for (size_t i = 0; i < ListLen; i++)
+    for (size_t i = 0; i < list->capacity; i++)
         fprintf(LOG_FILE, " %04lld |", i);
     fprintf(LOG_FILE, "\n\n");
 
     fprintf(LOG_FILE, "data:   ");
-    for (size_t i = 0; i < ListLen; i++)
+    for (size_t i = 0; i < list->capacity; i++)
         fprintf(LOG_FILE, " %04d |", list->data[i]);
     fprintf(LOG_FILE, "\n\n");
 
     fprintf(LOG_FILE, "next:   ");
-    for (size_t i = 0; i < ListLen; i++)
+    for (size_t i = 0; i < list->capacity; i++)
         fprintf(LOG_FILE, " %04d |", list->next[i]);
     fprintf(LOG_FILE, "\n\n");
 
     fprintf(LOG_FILE, "prev:   ");
-    for (size_t i = 0; i < ListLen; i++)
+    for (size_t i = 0; i < list->capacity; i++)
         fprintf(LOG_FILE, " %04d |", list->prev[i]);
     fprintf(LOG_FILE, "\n\n");
 
@@ -87,10 +95,12 @@ int list_push(List* list, int value, int previous) {
 
     list_verify(list);
 
+
     if (list->prev[previous] == -1) {
         fprintf(LOG_FILE, "Can't find this element!\n\n");
         return IncorrectInput;
     }
+
 
     list->data[list->free] = value;
 
@@ -103,6 +113,11 @@ int list_push(List* list, int value, int previous) {
     list->prev[list->next[list->free]] = list->free;
 
     list->free = next_free;
+
+    list->size += 1;
+
+    if (list->size >= list->capacity - 1)
+        list_realloc(list, list->capacity * REALLOCCOEFF);
 
     list_verify(list);
 
@@ -132,12 +147,63 @@ int list_pop(List* list, int previous) {
 
     list->free = next_free;
 
+    list->size -= 1;
+
     list_verify(list);
 
     pop_dump(list, previous);
 
     return NoErrors;
 }
+
+
+int list_realloc(List* list, size_t new_capacity) {
+
+    list_verify(list);
+
+    size_t needed_capacity = new_capacity * sizeof(int);
+
+    int* temp_data = (int*)realloc(list->data, needed_capacity);
+
+    if (temp_data != NULL) {
+        list->data = temp_data;
+        for (size_t i = list->capacity; i < new_capacity; i++)
+            list->data[i] = 0;
+    }
+    else
+        return ReallocError;
+
+
+    int* temp_next = (int*)realloc(list->next, needed_capacity);
+
+    if (temp_next != NULL) {
+        list->next = temp_next;
+        for (size_t i = list->capacity; i < new_capacity; i++)
+            list->next[i] = -1 * (i + 1);
+    }
+    else
+        return ReallocError;
+
+
+    int* temp_prev = (int*)realloc(list->prev, needed_capacity);
+
+    if (temp_prev != NULL) {
+        list->prev = temp_prev;
+        for (size_t i = list->capacity; i < new_capacity; i++)
+            list->prev[i] = -1;
+    }
+    else
+        return ReallocError;
+
+
+    //list->free = list->capacity;
+    list->capacity = new_capacity;
+
+    list_verify(list);
+
+    return NoErrors;
+}
+
 
 
 int list_check(const List* list) {
@@ -162,38 +228,41 @@ int list_check(const List* list) {
 
 int next_prev_check(const List* list) {
 
-    int NextData[ListLen] = {};
-    int PrevData[ListLen] = {};
+    int next_data[MAXLISTLEN] = {};
+    int prev_data[MAXLISTLEN] = {};
 
-    int NextCount = 0;
-    int NextCur = get_head(list);
+    int next_count = 0;
+    int next_cur = get_head(list);
 
-    while (NextCur != 0) {
+    while (next_cur != 0) {
 
-        NextData[NextCount] = list->data[NextCur];
-        NextCur = list->next[NextCur];
-        NextCount ++;
+        next_data[next_count] = list->data[next_cur];
+        next_cur = list->next[next_cur];
+        next_count ++;
     }
 
-    int PrevCount = 0;
-    int PrevCur = get_tail(list);
+    int prev_count = 0;
+    int prev_cur = get_tail(list);
 
 
-    while (PrevCur != 0) {
+    while (prev_cur != 0) {
 
-        PrevData[PrevCount] = list->data[PrevCur];
-        PrevCur = list->prev[PrevCur];
-        PrevCount ++;
+        prev_data[prev_count] = list->data[prev_cur];
+        prev_cur = list->prev[prev_cur];
+        prev_count ++;
     }
 
 
-    if (NextCount != PrevCount)
+    if (next_count != prev_count)
         return NotMatchNextPrev;
 
     else {
-        for (int i = 0; i < PrevCount; i++) {
-            if (NextData[i] != PrevData[PrevCount - 1 - i])
+        for (int i = 0; i < prev_count; i++) {
+            if (next_data[i] != prev_data[prev_count - 1 - i]) {
+                fprintf(LOG_FILE, "ERROR! For %d element next is %d, but %d is previous for %d\n", i, next_data[i],
+                                                                 prev_count - 1 - i, prev_data[prev_count - 1 - i]);
                 return NotMatchNextPrev;
+            }
         }
     }
 
@@ -220,13 +289,7 @@ int list_dump_picture(const List* list) {
 
     fprintf(dotfile, "digraph {\n");
     fprintf(dotfile, "  rankdir = LR;\n");
-    //fprintf(dotfile, "  overlap=false\n");
-    //fprintf(dotfile, "  splines = true\n");
-    //fprintf(dotfile, "  graph [splines = ortho];\n");
-    //fprintf(dotfile, "  splines = false\n");
-    //fprintf(dotfile, "  splines = curved\n");
-    //fprintf(dotfile, "  splines = polyline\n");
-    //fprintf(dotfile, "  nodesep = 1\n");
+
 
     int head = get_head(list);
     int tail = get_tail(list);
@@ -239,7 +302,7 @@ int list_dump_picture(const List* list) {
     fprintf(dotfile, "  el0[color = \"#333333\", style = filled, fillcolor = \"#E9E9E9\", label = \"0 | Reserved | <d0> value: %d | <n0> next: %d | <p0> prev: %d\"];\n",
                                     list->data[0], list->next[0], list->prev[0]);
 
-    for (int i = 1; i < ListLen; i++) {
+    for (int i = 1; i < list->capacity; i++) {
 
         if (list->prev[i] != -1) {
 
@@ -263,9 +326,9 @@ int list_dump_picture(const List* list) {
 
 
     fprintf(dotfile, "  ");
-    for (int i = 0; i < ListLen - 1; i++)
+    for (int i = 0; i < list->capacity - 1; i++)
         fprintf(dotfile, "el%d: <d%d> ->", i, i);
-    fprintf(dotfile, "el%lld: <d%lld> [weight = 1000, style = \"bold\", arrowhead = \"none\", color = \"#FFFFFF\"];\n", ListLen - 1, ListLen - 1);
+    fprintf(dotfile, "el%lld: <d%lld> [weight = 1000, style = \"bold\", arrowhead = \"none\", color = \"#FFFFFF\"];\n", list->capacity - 1, list->capacity - 1);
 
     int nCur = head;
     while (nCur != 0) {
@@ -288,7 +351,7 @@ int list_dump_picture(const List* list) {
 
 
     int fCur = list->free;
-    while (fCur != ListLen - 1) {
+    while (fCur != list->capacity - 1) {
         int NextfCur = abs(list->next[fCur]); //куда ведЄт стрелка
         fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [constraint = false, weight = 1, color = \"#000066\", style = \"dashed\"];\n", fCur, fCur, NextfCur, NextfCur);
         fCur = NextfCur;
@@ -300,7 +363,7 @@ int list_dump_picture(const List* list) {
     fprintf(dotfile, "{");
 
     fprintf(dotfile, "  general[color = \"#800000\", style = filled, fillcolor = \"#FFD5D5\", label = \"General information |  \
-    Capasity: %lld | Head: %d | Tail: %d | Free: %d\"];\n", ListLen - 1, head, tail, list->free);
+    Capacity: %lld | Size: %d | Head: %d | Tail: %d | Free: %d\"];\n", list->capacity - 1, list->size, head, tail, list->free);
 
     fprintf(dotfile, "}");
 
@@ -350,7 +413,6 @@ void pop_dump(const List* list, int previous) {
     fprintf(LOG_FILE, "\n\n");
 
     list_dump_picture(list);
-    //fprintf(LOG_FILE, "<img src=\"/Pictures/ListPictureimg/название файла с расширением\Ф>\n");
 
     list_dump(list, __FILE__, __LINE__, __func__);
 
@@ -375,15 +437,15 @@ void create_picture() {
     char command1[1000] = "C:\\Users\\admin\\Documents\\GitHub\\Lists\\Pictures\\ListPicture";
     char command2[] = ".png";
 
-    strcat(command1, PictureNum);
+    strcat(command1, PICTURENUM);
     strcat(command1, command2);
 
     strcat(command0, command1);
     system(command0);
 
-    fprintf(LOG_FILE, "<img src = \"%s\">\n", command1);
+    fprintf(LOG_FILE, "<img src = \"%s\" width = 70%>\n", command1);
 
-    snprintf(PictureNum, 2, "%d", (1 + atoi(PictureNum)));
+    snprintf(PICTURENUM, 2, "%d", (1 + atoi(PICTURENUM)));
 
 }
 

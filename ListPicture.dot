@@ -28,5 +28,5 @@ digraph {
   el0: <p0> -> el6: <p6> [constraint = false, weight = 1, color = "#006400", style = "dashed"];
   el5: <n5> -> el8: <n8> [constraint = false, weight = 1, color = "#000066", style = "dashed"];
   el8: <n8> -> el9: <n9> [constraint = false, weight = 1, color = "#000066", style = "dashed"];
-}{  general[color = "#800000", style = filled, fillcolor = "#FFD5D5", label = "General information |      Capasity: 9 | Head: 1 | Tail: 6 | Free: 5"];
+}{  general[color = "#800000", style = filled, fillcolor = "#FFD5D5", label = "General information |      Capacity: 9 | Size: 6 | Head: 1 | Tail: 6 | Free: 5"];
 }}
