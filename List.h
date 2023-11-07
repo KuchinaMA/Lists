@@ -48,8 +48,14 @@ int get_tail(const List* list);
 void push_dump(const List* list, int value, int previous);
 void pop_dump(const List* list, int previous);
 void ctor_dump(const List* list);
+void sort_dump(const List* list);
 
 void create_picture();
+
+int phys_to_log(List* list, int phys_index);
+int log_to_phys(List* list, int log_index);
+int list_find(List* list, int value);
+int list_sort (List* list);
 
 
 #endif // LIST_H_INCLUDED

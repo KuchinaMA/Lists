@@ -20,6 +20,14 @@ int main() {
 
     list_pop(&list, 4);
 
+    //printf("%d\n", phys_to_log(&list, 7));
+
+    //printf("%d\n", log_to_phys(&list, 134));
+
+    //printf("%d\n", list_find(&list, 90));
+
+    list_sort(&list);
+
     list_destructor(&list);
 
     return 0;

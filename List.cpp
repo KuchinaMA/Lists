@@ -7,7 +7,7 @@
 #include "Logfile.h"
 #include "List.h"
 
-char PICTURENUM[] = "1";
+char PICTURENUM[1000] = "1";
 
 int list_constructor(List* list) {
 
@@ -114,7 +114,7 @@ int list_push(List* list, int value, int previous) {
 
     list->free = next_free;
 
-    list->size += 1;
+    list->size++;
 
     if (list->size >= list->capacity - 1)
         list_realloc(list, list->capacity * REALLOCCOEFF);
@@ -131,7 +131,7 @@ int list_pop(List* list, int previous) {
     list_verify(list);
 
     if (list->prev[previous] == -1) {
-        fprintf(LOG_FILE, "This element has been already deleted!\n\n");
+        fprintf(LOG_FILE, "This element has been already deleted!\n\n"); // what correctly
         return IncorrectInput;
     }
 
@@ -147,7 +147,7 @@ int list_pop(List* list, int previous) {
 
     list->free = next_free;
 
-    list->size -= 1;
+    list->size--;
 
     list_verify(list);
 
@@ -195,8 +195,6 @@ int list_realloc(List* list, size_t new_capacity) {
     else
         return ReallocError;
 
-
-    //list->free = list->capacity;
     list->capacity = new_capacity;
 
     list_verify(list);
@@ -445,9 +443,133 @@ void create_picture() {
 
     fprintf(LOG_FILE, "<img src = \"%s\" width = 70%>\n", command1);
 
-    snprintf(PICTURENUM, 2, "%d", (1 + atoi(PICTURENUM)));
+    snprintf(PICTURENUM, 3, "%d", (1 + atoi(PICTURENUM)));
 
 }
+
+
+int phys_to_log(List* list, int phys_index) {
+
+    int cur_log_ind = 1;
+    int current = get_head(list);
+
+    while (current != phys_index) {
+        current = list->next[current];
+        cur_log_ind ++;
+        if (current == 0) {
+            fprintf(LOG_FILE, "Element with physical index %d is deleted\n", phys_index);
+            cur_log_ind = 0;
+            break;
+        }
+    }
+    return cur_log_ind;
+}
+
+int log_to_phys(List* list, int log_index) {
+
+    int next_log_ind = 2;
+    int current = get_head(list);
+
+    while (next_log_ind != log_index) {
+        current = list->next[current];
+        next_log_ind++;
+        if (current == 0) {
+            fprintf(LOG_FILE, "In list there's less elements than %d\n", log_index);
+            current = get_tail(list);
+            break;
+        }
+    }
+
+    return list->next[current];
+}
+
+int list_find(List* list, int value) {
+
+    int current = get_head(list);
+
+    while (list->data[current] != value) {
+        current = list->next[current];
+        if (current == 0) {
+            fprintf(LOG_FILE, "There's no element %d in list\n", value);
+            break;
+        }
+    }
+
+    return current;
+}
+
+int list_sort (List* list) {
+
+    int sz = list->size;
+
+    int* temp_data = (int*)calloc(list->capacity, sizeof(int));
+    temp_data[0] = LISTPOISON;
+
+    int current = get_head(list);
+
+    for (int i = 1; i <= sz; i++) {
+        temp_data[i] = list->data[current];
+        current = list->next[current];
+    }
+
+    for (int i = sz + 1; i < list->capacity; i++)
+        temp_data[i] = 0;
+
+    free(list->data);
+    list->data = temp_data;
+
+    int* temp_next = (int*)calloc(list->capacity, sizeof(int));
+
+    for (int i = 0; i < sz; i++)
+        temp_next[i] = i + 1;
+    temp_next[sz] = 0;
+
+    for (int i = sz + 1; i < list->capacity; i++)
+        temp_next[i] = -1 * (i + 1);
+
+    free(list->next);
+    list->next = temp_next;
+
+    int* temp_prev = (int*)calloc(list->capacity, sizeof(int));
+
+    int tail = get_tail(list);
+    temp_prev[0] = tail;
+
+    for (int i = 1; i <= sz; i++)
+        temp_prev[i] = i - 1;
+
+    for (int i = sz + 1; i < list->capacity; i++)
+        temp_prev[i] = -1;
+
+    free(list->data);
+    list->data = temp_data;
+
+    list->next[0] = 1;
+    list->prev[0] = list->size;
+
+    //int tmp_free = list->size;
+    //list->free = tmp_free + 1;
+
+    sort_dump(list);
+
+    return NoErrors;
+}
+
+void sort_dump(const List* list) {
+
+    fprintf(LOG_FILE, "List after sorting\n\n");
+    fprintf(LOG_FILE, "---------------------------------------------------------------------------------------------------------------");
+    fprintf(LOG_FILE, "\n\n");
+
+    list_dump_picture(list);
+
+    list_dump(list, __FILE__, __LINE__, __func__);
+
+}
+
+
+
+
 
 
 
