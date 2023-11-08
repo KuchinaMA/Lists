@@ -12,16 +12,16 @@ char PICTURENUM[1000] = "1";
 int list_constructor(List* list) {
 
     assert (list != NULL);
-
+                                    // not seamlessly pls
     list->data = (int*)calloc(INITIALLISTLEN, sizeof(int));
     list->data[0] = LISTPOISON;
 
     list->next = (int*)calloc(INITIALLISTLEN, sizeof(int));
-    for (size_t i = 0; i < INITIALLISTLEN; i++)
+    for (size_t i = 0; i < INITIALLISTLEN; i++)                             // copypaste, just one cycle
         list->next[i] = -1 * (i + 1);
 
     list->prev = (int*)calloc(INITIALLISTLEN, sizeof(int));
-    for (size_t i = 0; i < INITIALLISTLEN; i++)
+    for (size_t i = 0; i < INITIALLISTLEN; i++)                             // copypaste
         list->prev[i] = - 1;
 
     list->free = 1;
@@ -91,7 +91,7 @@ int list_dump(const List* list, const char *file, int line, const char *function
     return NoErrors;
 }
 
-int list_push(List* list, int value, int previous) {
+int list_push(List* list, int value, int previous) { // list_insert_after? what if we need to push before certain element?
 
     list_verify(list);
 
@@ -126,12 +126,12 @@ int list_push(List* list, int value, int previous) {
     return NoErrors;
 }
 
-int list_pop(List* list, int previous) {
+int list_pop(List* list, int previous) {    // hmm, it's like list_delete_after? why not certain element?
 
     list_verify(list);
 
-    if (list->prev[previous] == -1) {
-        fprintf(LOG_FILE, "This element has been already deleted!\n\n"); // what correctly
+    if (list->prev[previous] == -1) {       // if we delete element which is next to previous, why do we need prev[previous]?
+        fprintf(LOG_FILE, "This element has been already deleted!\n\n"); // what index exactly?
         return IncorrectInput;
     }
 
@@ -165,7 +165,7 @@ int list_realloc(List* list, size_t new_capacity) {
 
     int* temp_data = (int*)realloc(list->data, needed_capacity);
 
-    if (temp_data != NULL) {
+    if (temp_data != NULL) { 
         list->data = temp_data;
         for (size_t i = list->capacity; i < new_capacity; i++)
             list->data[i] = 0;
@@ -178,8 +178,8 @@ int list_realloc(List* list, size_t new_capacity) {
 
     if (temp_next != NULL) {
         list->next = temp_next;
-        for (size_t i = list->capacity; i < new_capacity; i++)
-            list->next[i] = -1 * (i + 1);
+        for (size_t i = list->capacity; i < new_capacity; i++)      // copypaste, just one cycle
+            list->next[i] = -1 * (i + 1);                          
     }
     else
         return ReallocError;
@@ -189,7 +189,7 @@ int list_realloc(List* list, size_t new_capacity) {
 
     if (temp_prev != NULL) {
         list->prev = temp_prev;
-        for (size_t i = list->capacity; i < new_capacity; i++)
+        for (size_t i = list->capacity; i < new_capacity; i++)      // copypaste
             list->prev[i] = -1;
     }
     else
@@ -321,7 +321,7 @@ int list_dump_picture(const List* list) {
                                   i, i, i, list->data[i], i, list->next[i], i, list->prev[i]);
 
     }
-
+    
 
     fprintf(dotfile, "  ");
     for (int i = 0; i < list->capacity - 1; i++)
@@ -329,30 +329,32 @@ int list_dump_picture(const List* list) {
     fprintf(dotfile, "el%lld: <d%lld> [weight = 1000, style = \"bold\", arrowhead = \"none\", color = \"#FFFFFF\"];\n", list->capacity - 1, list->capacity - 1);
 
     int nCur = head;
+    
     while (nCur != 0) {
-        int NextnCur = list->next[nCur]; //куда ведёт стрелка
+        int NextnCur = list->next[nCur]; //пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [constraint = false, weight = 1, color = \"#006400\"];\n", nCur, nCur, NextnCur, NextnCur);
         nCur = NextnCur;
     }
-    int NextnCur = list->next[nCur];     //рисуем стрелку из фиктивного элемента
+    
+    int NextnCur = list->next[nCur];     //пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [constraint = false, weight = 1, color = \"#006400\"];\n", nCur, nCur, NextnCur, NextnCur);
 
 
-    int pCur = tail;
+    int pCur = tail; 
     while (pCur != 0) {
-        int NextpCur = list->prev[pCur]; //куда ведёт стрелка
+        int NextpCur = list->prev[pCur]; //пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         fprintf(dotfile, "  el%d: <p%d> -> el%d: <p%d> [constraint = false, weight = 1, color = \"#006400\", style = \"dashed\"];\n", pCur, pCur, NextpCur, NextpCur);
         pCur = NextpCur;
     }
-    int NextpCur = list->prev[pCur];     //рисуем стрелку из фиктивного элемента
+    int NextpCur = list->prev[pCur];     //пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     fprintf(dotfile, "  el%d: <p%d> -> el%d: <p%d> [constraint = false, weight = 1, color = \"#006400\", style = \"dashed\"];\n", pCur, pCur, NextpCur, NextpCur);
 
-
+    
     int fCur = list->free;
-    while (fCur != list->capacity - 1) {
-        int NextfCur = abs(list->next[fCur]); //куда ведёт стрелка
+    while (fCur != list->capacity - 1) {        // ALERT: ENDLESS WHILE! THE REASON OF NON-ENDING SORTING FUCTION!
+        int NextfCur = abs(list->next[fCur]); //пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [constraint = false, weight = 1, color = \"#000066\", style = \"dashed\"];\n", fCur, fCur, NextfCur, NextfCur);
-        fCur = NextfCur;
+        fCur = NextfCur; 
     }
 
     fprintf(dotfile, "}");
@@ -448,9 +450,9 @@ void create_picture() {
 }
 
 
-int phys_to_log(List* list, int phys_index) {
+int phys_to_log(List* list, int phys_index) { // both phys_to_log
 
-    int cur_log_ind = 1;
+    int cur_log_ind = 1;                // 1-indexation, python hehe
     int current = get_head(list);
 
     while (current != phys_index) {
@@ -465,8 +467,8 @@ int phys_to_log(List* list, int phys_index) {
     return cur_log_ind;
 }
 
-int log_to_phys(List* list, int log_index) {
-
+int log_to_phys(List* list, int log_index) {    // and log_to_phys should work as O(1) in sorted case; in e.g. make bool variable called sorted in list
+                                                // and check it here; if it is true, you don't need to go through next
     int next_log_ind = 2;
     int current = get_head(list);
 
@@ -498,7 +500,8 @@ int list_find(List* list, int value) {
     return current;
 }
 
-int list_sort (List* list) {
+
+int list_sort(List* list) {
 
     int sz = list->size;
 
