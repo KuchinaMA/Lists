@@ -351,7 +351,7 @@ int list_dump_picture(const List* list) {
 
     
     int fCur = list->free;
-    while (fCur != list->capacity - 1) {        // ALERT: ENDLESS WHILE! THE REASON OF NON-ENDING SORTING FUCTION! just list->capacity
+    while (fCur != list->capacity - 1) {        // ALERT: ENDLESS WHILE! THE REASON OF NON-ENDING SORTING FUCTION!
         int NextfCur = abs(list->next[fCur]); //���� ���� �������
         fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [constraint = false, weight = 1, color = \"#000066\", style = \"dashed\"];\n", fCur, fCur, NextfCur, NextfCur);
         fCur = NextfCur; 
