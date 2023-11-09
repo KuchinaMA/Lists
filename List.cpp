@@ -329,27 +329,21 @@ int list_dump_picture(const List* list) {
     fprintf(dotfile, "el%lld: <d%lld> [weight = 1000, style = \"bold\", arrowhead = \"none\", color = \"#FFFFFF\"];\n", list->capacity - 1, list->capacity - 1);
 
     int nCur = head;
-    while (nCur != 0) {
+    for (int i = 0; i <= list->size; i++) {
         int NextnCur = list->next[nCur]; //куда ведёт стрелка
         fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [constraint = false, weight = 1, color = \"#006400\"];\n", nCur, nCur, NextnCur, NextnCur);
         nCur = NextnCur;
     }
-    int NextnCur = list->next[nCur];     //рисуем стрелку из фиктивного элемента
-    fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [constraint = false, weight = 1, color = \"#006400\"];\n", nCur, nCur, NextnCur, NextnCur);
-
 
     int pCur = tail;
-    while (pCur != 0) {
+    for (int i = 0; i <= list->size; i++) {
         int NextpCur = list->prev[pCur]; //куда ведёт стрелка
         fprintf(dotfile, "  el%d: <p%d> -> el%d: <p%d> [constraint = false, weight = 1, color = \"#006400\", style = \"dashed\"];\n", pCur, pCur, NextpCur, NextpCur);
         pCur = NextpCur;
     }
-    int NextpCur = list->prev[pCur];     //рисуем стрелку из фиктивного элемента
-    fprintf(dotfile, "  el%d: <p%d> -> el%d: <p%d> [constraint = false, weight = 1, color = \"#006400\", style = \"dashed\"];\n", pCur, pCur, NextpCur, NextpCur);
-
 
     int fCur = list->free;
-    while (fCur != list->capacity - 1) {
+    for(int i = list->size + 1; i < list->capacity - 1; i++) {
         int NextfCur = abs(list->next[fCur]); //куда ведёт стрелка
         fprintf(dotfile, "  el%d: <n%d> -> el%d: <n%d> [constraint = false, weight = 1, color = \"#000066\", style = \"dashed\"];\n", fCur, fCur, NextfCur, NextfCur);
         fCur = NextfCur;
@@ -501,6 +495,8 @@ int list_find(List* list, int value) {
 int list_sort (List* list) {
 
     int sz = list->size;
+    int head = get_head(list);
+    int tail = get_tail(list);
 
     int* temp_data = (int*)calloc(list->capacity, sizeof(int));
     temp_data[0] = LISTPOISON;
@@ -518,10 +514,12 @@ int list_sort (List* list) {
     free(list->data);
     list->data = temp_data;
 
+
     int* temp_next = (int*)calloc(list->capacity, sizeof(int));
 
     for (int i = 0; i < sz; i++)
         temp_next[i] = i + 1;
+
     temp_next[sz] = 0;
 
     for (int i = sz + 1; i < list->capacity; i++)
@@ -530,9 +528,9 @@ int list_sort (List* list) {
     free(list->next);
     list->next = temp_next;
 
+
     int* temp_prev = (int*)calloc(list->capacity, sizeof(int));
 
-    int tail = get_tail(list);
     temp_prev[0] = tail;
 
     for (int i = 1; i <= sz; i++)
@@ -541,14 +539,13 @@ int list_sort (List* list) {
     for (int i = sz + 1; i < list->capacity; i++)
         temp_prev[i] = -1;
 
-    free(list->data);
-    list->data = temp_data;
+    free(list->prev);
+    list->prev = temp_prev;
 
     list->next[0] = 1;
     list->prev[0] = list->size;
 
-    //int tmp_free = list->size;
-    //list->free = tmp_free + 1;
+    list->free = sz + 1;
 
     sort_dump(list);
 
